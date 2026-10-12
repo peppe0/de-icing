@@ -68,7 +68,7 @@ def cattura(cfg: dict) -> int:
     return salvate
 
 
-def calcola(cfg: dict) -> None:
+def calcola(cfg: dict, fissa_k3: bool = False) -> None:
     board = crea_board(cfg)
     detector = cv2.aruco.CharucoDetector(board)
     cartella = percorso(cfg, "immagini_calibrazione")
@@ -96,16 +96,25 @@ def calcola(cfg: dict) -> None:
         raise SystemExit(f"Immagini valide: {len(punti_3d)}. Ne servono almeno {MIN_IMMAGINI}: "
                          "usa 'python calibra.py cattura'.")
 
-    rms, K, dist, _, _, _, _, errori = cv2.calibrateCameraExtended(punti_3d, punti_2d, dimensione, None, None)
-    errori = errori.ravel()
+    # Con poca distorsione k3 tende a "inseguire" il rumore: fissarlo a 0 rende la stima più stabile.
+    flags = cv2.CALIB_FIX_K3 if fissa_k3 else 0
+    rms, K, dist, _, _, std, _, errori = cv2.calibrateCameraExtended(punti_3d, punti_2d, dimensione, None, None,
+                                                                     flags=flags)
+    errori, std, d = errori.ravel(), std.ravel(), dist.ravel()
 
     w, _ = dimensione
     fov_x = math.degrees(2 * math.atan(w / (2 * K[0, 0])))
     print(f"\nImmagini usate: {len(punti_3d)} su {len(file_immagini)}  —  risoluzione {dimensione[0]}x{dimensione[1]}")
     print(f"Errore di riproiezione RMS: {rms:.3f} px  "
           f"({'ottimo' if rms < 0.5 else 'accettabile' if rms < 1 else 'da rifare'})")
-    print(f"fx = {K[0, 0]:.1f}  fy = {K[1, 1]:.1f}  cx = {K[0, 2]:.1f}  cy = {K[1, 2]:.1f}  (FOV orizzontale ≈ {fov_x:.1f}°)")
-    print(f"distorsione [k1 k2 p1 p2 k3] = {np.round(dist.ravel(), 4)}")
+    # std contiene le deviazioni standard nell'ordine fx, fy, cx, cy, k1, k2, p1, p2, k3, ...
+    print(f"fx = {K[0, 0]:.1f} ± {std[0]:.1f}   fy = {K[1, 1]:.1f} ± {std[1]:.1f}   "
+          f"cx = {K[0, 2]:.1f} ± {std[2]:.1f}   cy = {K[1, 2]:.1f} ± {std[3]:.1f}   (FOV orizzontale ≈ {fov_x:.1f}°)")
+    print("distorsione: " + "   ".join(f"{nome} = {d[i]:.4f} ± {std[4 + i]:.4f}"
+                                        for i, nome in enumerate(["k1", "k2", "p1", "p2", "k3"]))
+          + ("   (k3 fissato a 0)" if fissa_k3 else ""))
+    print("Le incertezze (±) dicono quanto ogni parametro è determinato dalle foto: se sono grandi\n"
+          "(cx, cy di diversi pixel, k di un ordine simile al valore), servono più foto inclinate e ai bordi.")
 
     soglia = max(2 * float(np.median(errori)), 0.5)  # sotto 0.5 px un'immagine va comunque bene
     peggiori = [(n, e) for n, e in zip(nomi, errori) if e > soglia]
@@ -147,16 +156,18 @@ def verifica(cfg: dict) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("azione", choices=["cattura", "calcola", "verifica"])
+    ap.add_argument("--fix-k3", action="store_true",
+                    help="tieni k3 = 0 (consigliato per webcam con poca distorsione)")
     args = ap.parse_args()
     cfg = carica_config()
 
     if args.azione == "cattura":
         if cattura(cfg) >= MIN_IMMAGINI:
-            calcola(cfg)
+            calcola(cfg, args.fix_k3)
         else:
             print(f"Servono almeno {MIN_IMMAGINI} immagini per calcolare la calibrazione.")
     elif args.azione == "calcola":
-        calcola(cfg)
+        calcola(cfg, args.fix_k3)
     else:
         verifica(cfg)
 

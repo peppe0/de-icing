@@ -26,7 +26,10 @@ nello stesso ambiente vanno in conflitto. Il codice funziona con OpenCV 4.8+ e 5
    su un supporto rigido, **misura col righello** e scrivi le misure reali in `config.yaml`.
 2. **Calibra la camera**: `python calibra.py cattura`. Salva 20-30 immagini della board
    (SPAZIO) e premi q: la calibrazione viene calcolata e salvata in `dati/calibrazione.yaml`.
-   Controlla il risultato con `python calibra.py verifica`.
+   Controlla il risultato con `python calibra.py verifica`. Accanto a ogni parametro trovi la
+   sua incertezza (±): se è grande, servono più foto inclinate e ai bordi. Con le webcam, che
+   hanno poca distorsione, `python calibra.py calcola --fix-k3` dà di solito una stima più stabile.
+   Non eliminare foto solo per abbassare l'RMS: togliendo le più difficili scende sempre.
 3. **Completa `posa.py`**: un TODO alla volta. Dopo ognuno esegui `python controlla_posa.py`,
    che verifica il tuo codice su immagini sintetiche, senza webcam.
 4. **Usa l'app**: `python app.py`.
