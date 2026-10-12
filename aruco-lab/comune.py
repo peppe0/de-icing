@@ -53,8 +53,10 @@ def apri_camera(cfg: dict) -> cv2.VideoCapture:
     if not cap.isOpened():
         raise RuntimeError(
             f"Impossibile aprire la camera {c['indice']}.\n"
-            "- Su Mac: Impostazioni di Sistema → Privacy e sicurezza → Fotocamera, "
-            "abilita il Terminale (o VS Code).\n"
+            "- Su Mac, la prima volta il sistema chiede il permesso e OpenCV non aspetta la risposta: "
+            "consenti e rilancia il comando.\n"
+            "- Se non compare nessuna richiesta: Impostazioni di Sistema → Privacy e sicurezza → Fotocamera, "
+            "abilita l'app da cui lanci il comando (Terminale, iTerm o VS Code), chiudila con Cmd+Q e riaprila.\n"
             "- Prova un altro indice in config.yaml (camera.indice).")
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, c["larghezza"])
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, c["altezza"])

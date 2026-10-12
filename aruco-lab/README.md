@@ -100,9 +100,14 @@ I grafici di questi esperimenti sono già materiale per il capitolo sperimentale
 
 ## Problemi comuni
 
-- **La camera non si apre**: su Mac dai il permesso al Terminale o a VS Code in Impostazioni
-  di Sistema → Privacy e sicurezza → Fotocamera. Se si apre la camera sbagliata (per esempio
-  l'iPhone con Continuity Camera), cambia `camera.indice` in `config.yaml`.
+- **La camera non si apre** (`not authorized to capture video`): su Mac, la prima volta il
+  sistema chiede il permesso ma OpenCV non aspetta la risposta. Consenti e rilancia il comando.
+  Se la richiesta non compare, abilita l'app da cui lanci il comando (Terminale, iTerm o VS Code)
+  in Impostazioni di Sistema → Privacy e sicurezza → Fotocamera, chiudila con Cmd+Q e riaprila.
+  Se l'app non è nell'elenco, `tccutil reset Camera com.apple.Terminal` (per VS Code
+  `com.microsoft.VSCode`, per iTerm `com.googlecode.iterm2`) azzera il permesso di quell'app e fa
+  ricomparire la richiesta al lancio successivo. Se si apre la camera sbagliata (per esempio l'iPhone con Continuity
+  Camera), cambia `camera.indice` in `config.yaml`.
 - **Il marker non viene rilevato**: serve un bordo bianco attorno al marker; il dizionario in
   `config.yaml` deve essere lo stesso usato per generarlo; evita riflessi; se è piccolo nell'immagine,
   abbassa il perimetro minimo con gli slider.
