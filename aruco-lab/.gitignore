@@ -1,0 +1,4 @@
+# file generati: fogli da stampare, immagini e file di calibrazione, registrazioni, screenshot
+dati/
+.venv/
+__pycache__/

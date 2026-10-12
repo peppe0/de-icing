@@ -1,0 +1,25 @@
+# Configurazione di aruco-lab. I percorsi sono relativi alla cartella aruco-lab/.
+
+camera:
+  indice: 0            # su Mac, se si apre la camera dell'iPhone (Continuity Camera), prova 1
+  larghezza: 1280
+  altezza: 720
+  autofocus: false     # l'autofocus cambia la focale e invalida la calibrazione
+
+marker:
+  dizionario: DICT_4X4_50
+  lato_m: 0.05         # lato REALE del marker stampato (bordo nero compreso), in metri: misuralo!
+
+charuco:
+  quadrati_x: 7
+  quadrati_y: 5
+  lato_quadrato_m: 0.030   # misura reale dopo la stampa
+  lato_marker_m: 0.022     # misura reale dopo la stampa
+  dizionario: DICT_5X5_100 # diverso da quello dei marker singoli, così i due non si confondono
+
+file:
+  calibrazione: dati/calibrazione.yaml
+  immagini_calibrazione: dati/immagini_calibrazione
+  stampa: dati/stampa
+  registrazioni: dati/registrazioni
+  screenshot: dati/screenshot
